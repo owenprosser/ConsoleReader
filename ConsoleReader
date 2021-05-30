@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+import sys, tempfile, os
+from subprocess import call
+from pick import pick
+
+bookmarks = []
+
+def PopulateArticlesList():
+    bookmarks.append(["The media's lab leak fiasco", "slowboring.com"])
+    bookmarks.append(["Typeface Descriptions & Histories", "archive.org"])
+
+def Menu():
+    selected = pick(bookmarks, "Menu:", indicator='==>')
+    OpenTextInEditor(selected[0][0])
+
+def get_label(option): return option.get('label')
+
+def OpenTextInEditor(text):
+    EDITOR = os.environ.get('EDITOR','vim')
+    message = text.encode()
+
+    with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+      tf.write(message)
+      tf.flush()
+      call([EDITOR, tf.name])
+
+      # do the parsing with `tf` using regular File operations.
+      # for instance:
+      tf.seek(0)
+
+if __name__ == "__main__":
+    PopulateArticlesList()
+    Menu()
