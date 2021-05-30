@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-import sys, tempfile, os, requests, json
+import sys, tempfile, os, requests, json, re
 import urllib.request
 from subprocess import call
 from pick import pick
 from bs4 import BeautifulSoup
+import signal
 
 class HackerNewsReader():
     def __init__(self):
         self.newsItems = []
         self.newsIDs = []
-        self.noOfItems = 2
+        self.noOfItems = 5
 
     def PopulateArticlesList(self):
         r = requests.get('https://hacker-news.firebaseio.com//v0/topstories.json')
@@ -33,15 +34,21 @@ class HackerNewsReader():
             for i in self.newsItems:
                 titleList.append(i["title"])
 
-            selected = pick(titleList, "Menu:", indicator='==>')
+            selected = pick(titleList, "Menu:", indicator='>')
             selectedUrl = self.newsItems[selected[1]]['url']
             self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
 
     def GetHtmlContent(self, url):
+        text = ""
         uf = urllib.request.urlopen(url)
         html = uf.read()
-        soup = BeautifulSoup(html, "html")
-        return soup.get_text()
+        soup = BeautifulSoup(html, "lxml")
+
+        for hit in soup.findAll(['h1', 'p']):
+            hit = hit.text.strip()
+            text += "\n\n" + hit
+
+        return text
 
     def OpenTextInEditor(self, text):
         EDITOR = os.environ.get('EDITOR','vim')
@@ -55,7 +62,11 @@ class HackerNewsReader():
             # for instance:
             tf.seek(0)
 
+def signal_handler(sig, frame):
+    sys.exit(0)
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
     reader = HackerNewsReader()
     reader.PopulateArticlesList()
     reader.PopulateNewsItems()
