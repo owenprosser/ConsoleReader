@@ -10,10 +10,20 @@ class HackerNewsReader():
 
     def PopulateArticlesList(self):
         r = requests.get('https://hacker-news.firebaseio.com//v0/topstories.json')
-        self.newsIDs = r.json()
+        self.newsIDs = json.loads(r.text)
 
     def PopulateNewsItems(self):
-        print(self.newsIDs)
+        self.newsIDs = self.newsIDs[:10]
+        print(len(self.newsIDs))
+
+        for id in self.newsIDs:
+            requestString = 'https://hacker-news.firebaseio.com/v0/item/'+str(id)+'.json'
+            r = requests.get(requestString)
+            result = json.loads(r.text)
+            self.newsItems.append({id ,result["title"]})
+
+        print(self.newsItems)
+
 
     def Menu(self):
         selected = pick(self.newsItems, "Menu:", indicator='==>')
