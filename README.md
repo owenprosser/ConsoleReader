@@ -1,5 +1,12 @@
 # ConsoleReader
-An app for reading [HackerNews](https://news.ycombinator.com) from the console.
+An app for reading [HackerNews](https://news.ycombinator.com) from the console. 
+
+The text from news items is opened in Vim; I would reccomend adding these two lines to your ~/.vimrc to make long form text more readable.
+
+```
+set number
+set linebreak
+```
 
 ![ConsoleReader Screen Shot](/image/ConsoleReader.png?raw=true "ConsoleReader Screen Shot")
 
