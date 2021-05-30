@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, tempfile, os, requests, json, re, asyncio, aiohttp, signal
+import sys, tempfile, os, requests, json, re, asyncio, aiohttp, signal, webbrowser, subprocess
 import urllib.request
 from subprocess import call
 from pick import pick
@@ -65,7 +65,13 @@ class HackerNewsReader():
             selectedUrl = self.newsItems[selected[1]]['url']
 
             if(selected[1] != len(titleList)-1):
-                self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
+                if "twitter.com" or "news.ycombinator.com" not in selectedUrl:
+                    self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
+                else:
+                    if sys.platform == 'darwin':    # in case of OS X
+                        subprocess.Popen(['open', selectedUrl])
+                    else:
+                        webbrowser.open_new_tab(selectedUrl)
             else:
                 position += self.noOfItems
 
