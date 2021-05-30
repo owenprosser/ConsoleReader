@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+import sys, tempfile, os, requests, json
+from subprocess import call
+from pick import pick
+
+class HackerNewsReader():
+    def __init__(self):
+        self.newsItems = []
+        self.newsIDs = []
+
+    def PopulateArticlesList(self):
+        r = requests.get('https://hacker-news.firebaseio.com//v0/topstories.json')
+        self.newsIDs = r.json()
+
+    def PopulateNewsItems(self):
+        print(self.newsIDs)
+
+    def Menu(self):
+        selected = pick(self.newsItems, "Menu:", indicator='==>')
+        self.OpenTextInEditor(selected[0][0])
+
+    def OpenTextInEditor(self, text):
+        EDITOR = os.environ.get('EDITOR','vim')
+        message = text.encode()
+        with tempfile.NamedTemporaryFile(suffix=".tmp") as tf:
+            tf.write(message)
+            tf.flush()
+            call([EDITOR, tf.name])
+
+            # do the parsing with `tf` using regular File operations.
+            # for instance:
+            tf.seek(0)
+
+if __name__ == "__main__":
+    reader = HackerNewsReader()
+    reader.PopulateArticlesList()
+    reader.PopulateNewsItems()
