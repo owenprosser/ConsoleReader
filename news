@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 import sys, tempfile, os, requests, json
+import urllib.request
 from subprocess import call
 from pick import pick
+from bs4 import BeautifulSoup
 
 class HackerNewsReader():
     def __init__(self):
         self.newsItems = []
         self.newsIDs = []
-        self.noOfItems = 1
+        self.noOfItems = 2
 
     def PopulateArticlesList(self):
         r = requests.get('https://hacker-news.firebaseio.com//v0/topstories.json')
@@ -25,14 +27,21 @@ class HackerNewsReader():
                 tempdict.update({'id':result["id"],'url':result['url'],'title':result["title"]})
                 self.newsItems.append(tempdict)
 
-
     def Menu(self):
-        for i in self.newsItems:
-            print(i["title"])
-            input()
+        while True:
+            titleList = []
+            for i in self.newsItems:
+                titleList.append(i["title"])
 
-        #selected = pick(items, "Menu:", indicator='==>')
-        #self.OpenTextInEditor(selected[0][0])
+            selected = pick(titleList, "Menu:", indicator='==>')
+            selectedUrl = self.newsItems[selected[1]]['url']
+            self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
+
+    def GetHtmlContent(self, url):
+        uf = urllib.request.urlopen(url)
+        html = uf.read()
+        soup = BeautifulSoup(html, "html")
+        return soup.get_text()
 
     def OpenTextInEditor(self, text):
         EDITOR = os.environ.get('EDITOR','vim')
