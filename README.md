@@ -1,6 +1,8 @@
 # ConsoleReader
 An app for reading [HackerNews](https://news.ycombinator.com) from the console.
 
+![ConsoleReader Screen Shot](http://owenprosser.com/ConsoleReader/ConsoleReader.png "ConsoleReader Screen Shot")
+
 ## To run as commmand in bash:
 Make the file executable
 
