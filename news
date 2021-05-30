@@ -4,13 +4,14 @@ import urllib.request
 from subprocess import call
 from pick import pick
 from bs4 import BeautifulSoup
-from pynput.keyboard import Key, Listener
+from datetime import datetime, date
+import calendar
 
 class HackerNewsReader():
     def __init__(self):
         self.newsItems = []
         self.newsIDs = []
-        self.noOfItems = 10
+        self.noOfItems = 30
         self.browsedPosition = -1
 
     def PopulateArticlesList(self):
@@ -18,7 +19,10 @@ class HackerNewsReader():
         self.newsIDs = json.loads(r.text)
 
     def PopulateNewsItems(self, startIndex):
-        IDlist = self.newsIDs[startIndex:startIndex+self.noOfItems]
+        if(startIndex+self.noOfItems+1 > 500):
+            startIndex = (500-self.noOfItems+1)
+
+        IDlist = self.newsIDs[startIndex:startIndex+self.noOfItems+1]
         self.newsItems = []
         urls = []
         for id in IDlist:
@@ -29,10 +33,11 @@ class HackerNewsReader():
 
         for item in data:
             tempDict = dict()
-            tempDict.update({"id":item["id"], "title":item["title"], "url":item["url"]})
-            self.newsItems.append(tempDict)
+            if "url" in item:
+                tempDict.update({"id":item["id"], "title":item["title"], "url":item["url"]})
+                self.newsItems.append(tempDict)
 
-        tempDict.update({"id":000, "title":"\tMore:", "url":"http://example.com"})
+        tempDict.update({"id":0000, "title":"\tMore items:" + str(startIndex+1+self.noOfItems) +"-"+str(startIndex+(self.noOfItems*2)), "url":"http://owenprosser.com"})
         self.browsedPosition = startIndex
 
     def Menu(self):
@@ -47,10 +52,19 @@ class HackerNewsReader():
             for i in self.newsItems:
                 titleList.append(i["title"])
 
-            selected = pick(titleList, "Menu:", indicator='>')
+            now = datetime.now()
+            dayName = calendar.day_name[date.today().weekday()]
+            day = now.day
+            if 4 <= day <= 20 or 24 <= day <= 30:
+                suffix = "th"
+            else:
+                suffix = ["st", "nd", "rd"][day % 10 - 1]
+
+            title = "news.ycombinator.com - " + dayName + " "+ now.strftime("%d"+suffix) + now.strftime(" of %B %Y %H:%M")
+            selected = pick(titleList, title, indicator='>')
             selectedUrl = self.newsItems[selected[1]]['url']
 
-            if(None not in selected):
+            if(selected[1] != len(titleList)-1):
                 self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
             else:
                 position += self.noOfItems
@@ -101,10 +115,6 @@ class HttpClient():
 
 def signal_handler(sig, frame):
     sys.exit(0)
-
-def on_release(key):
-    if key == Key.O:
-        print("O Pressed")
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
