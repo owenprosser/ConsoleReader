@@ -16,10 +16,11 @@ class HackerNewsReader():
         r = requests.get('https://hacker-news.firebaseio.com//v0/topstories.json')
         self.newsIDs = json.loads(r.text)
 
-    def PopulateNewsItems(self):
-        self.newsIDs = self.newsIDs[:self.noOfItems]
+    def PopulateNewsItems(self, startIndex):
+        IDlist = self.newsIDs[startIndex:startIndex+self.noOfItems]
+        self.newsItems = []
 
-        for id in self.newsIDs:
+        for id in IDlist:
             requestString = 'https://hacker-news.firebaseio.com/v0/item/'+str(id)+'.json'
             r = requests.get(requestString)
             if(r.status_code == 200):
@@ -27,21 +28,31 @@ class HackerNewsReader():
                 tempdict = dict()
                 tempdict.update({'id':result["id"],'url':result['url'],'title':result["title"]})
                 self.newsItems.append(tempdict)
+        tempdict.update({'id':None,'url':None,'title':"\tMore:"})
 
     def Menu(self):
+        selected = None
+        position = 0
+
         while True:
+            self.PopulateNewsItems(position)
+
             titleList = []
             for i in self.newsItems:
                 titleList.append(i["title"])
 
             selected = pick(titleList, "Menu:", indicator='>')
             selectedUrl = self.newsItems[selected[1]]['url']
-            self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
+
+            if(None in selected):
+                self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
+            else:
+                position += self.noOfItems
 
     def GetHtmlContent(self, url):
         text = ""
-        uf = urllib.request.urlopen(url)
-        html = uf.read()
+        uf = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+        html = uf.content
         soup = BeautifulSoup(html, "lxml")
 
         for hit in soup.findAll(['h1', 'p']):
@@ -69,5 +80,5 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     reader = HackerNewsReader()
     reader.PopulateArticlesList()
-    reader.PopulateNewsItems()
+
     reader.Menu()
