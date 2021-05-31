@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys, tempfile, os, requests, json, re, asyncio, aiohttp, signal, webbrowser, subprocess
 import urllib.request
+from urllib.parse import urlparse
 from subprocess import call
 from pick import pick
 from bs4 import BeautifulSoup
@@ -48,9 +49,7 @@ class HackerNewsReader():
             if(position != self.browsedPosition):
                 self.PopulateNewsItems(position)
 
-            titleList = []
-            for i in self.newsItems:
-                titleList.append(i["title"])
+            titleList = self.CreateTitle(self.newsItems)
 
             now = datetime.now()
             dayName = calendar.day_name[date.today().weekday()]
@@ -65,7 +64,7 @@ class HackerNewsReader():
             selectedUrl = self.newsItems[selected[1]]['url']
 
             if(selected[1] != len(titleList)-1):
-                if "twitter.com" or "news.ycombinator.com" not in selectedUrl:
+                if "twitter.com" not in selectedUrl:
                     self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
                 else:
                     if sys.platform == 'darwin':    # in case of OS X
@@ -98,6 +97,20 @@ class HackerNewsReader():
             # do the parsing with `tf` using regular File operations.
             # for instance:
             tf.seek(0)
+
+    def CreateTitle(self, newsItems):
+        count = 1
+        titleList = []
+        for item in newsItems:
+            if(count <= self.noOfItems):
+                if(len(str(count)) == 1):
+                    titleList.append(" " + str(count) + ". " + item["title"] + " (" + urlparse(item["url"]).netloc + ")")
+                else:
+                    titleList.append(str(count) + ". " + item["title"] + " (" + urlparse(item["url"]).netloc + ")")
+                count+=1
+            else:
+                titleList.append(item["title"])
+        return titleList
 
 class HttpClient():
     def __init__(self):
