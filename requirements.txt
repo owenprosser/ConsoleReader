@@ -1,5 +1,4 @@
 pick
 aiohttp
-BeautifulSoup
+bs4
 requests
-aiohttp
