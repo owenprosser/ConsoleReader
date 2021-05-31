@@ -3,7 +3,7 @@ import sys, tempfile, os, requests, json, re, asyncio, aiohttp, signal, webbrows
 import urllib.request
 from urllib.parse import urlparse
 from subprocess import call
-from pick import pick
+from pick import Picker, pick
 from bs4 import BeautifulSoup
 from datetime import datetime, date
 import calendar
@@ -14,6 +14,7 @@ class HackerNewsReader():
         self.newsIDs = []
         self.noOfItems = 30
         self.browsedPosition = -1
+        self.OpenLinkInBrowser = False
 
     def PopulateArticlesList(self):
         r = requests.get('https://hacker-news.firebaseio.com//v0/topstories.json')
@@ -44,7 +45,6 @@ class HackerNewsReader():
     def Menu(self):
         selected = None
         position = 0
-
         while True:
             if(position != self.browsedPosition):
                 self.PopulateNewsItems(position)
@@ -60,19 +60,31 @@ class HackerNewsReader():
                 suffix = ["st", "nd", "rd"][day % 10 - 1]
 
             title = "news.ycombinator.com - " + dayName + " "+ now.strftime("%d"+suffix) + now.strftime(" of %B %Y %H:%M")
-            selected = pick(titleList, title, indicator='>')
+
+            menu = Picker(titleList, title)
+            menu.register_custom_handler(ord('o'),  self.OpenInBrowserInvoke)
+            menu.indicator = ">"
+            selected = menu.start()
             selectedUrl = self.newsItems[selected[1]]['url']
 
             if(selected[1] != len(titleList)-1):
-                if "twitter.com" not in selectedUrl:
-                    self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
+                if self.OpenLinkInBrowser:
+                    self.OpenInBrowser(selectedUrl)
                 else:
-                    if sys.platform == 'darwin':    # in case of OS X
-                        subprocess.Popen(['open', selectedUrl])
-                    else:
-                        webbrowser.open_new_tab(selectedUrl)
+                    self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
             else:
                 position += self.noOfItems
+
+    def OpenInBrowserInvoke(self, picker):
+        self.OpenLinkInBrowser = True
+        return None, 0
+
+    def OpenInBrowser(self, url):
+        if sys.platform == 'darwin':    # in case of OS X
+            subprocess.Popen(['open', url])
+        else:
+            webbrowser.open_new_tab(url)
+        self.OpenLinkInBrowser = False
 
     def GetHtmlContent(self, url):
         text = ""
