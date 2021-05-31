@@ -152,7 +152,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def PrintHelp():
-    print("usage: \tSort Options:\n\t[top]\t# Top Stories\n\t[new]\t# New Stories\n\t[best]\t# Best Stories")
+    print("usage: \tSort Options:\n\t[top]\t# Top Stories\n\t[new]\t# New Stories\n\t[best]\t# Best Stories\n\n\tKeys: \n\t{Enter} # Read Story \n\t{o}     # Open in browser")
     quit()
 
 if __name__ == "__main__":
