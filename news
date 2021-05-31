@@ -153,4 +153,6 @@ if __name__ == "__main__":
     reader = HackerNewsReader()
     reader.PopulateArticlesList()
 
+    print(chr(27) + "[2J")#Clear console
+
     reader.Menu()
