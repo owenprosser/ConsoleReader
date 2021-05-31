@@ -15,9 +15,14 @@ class HackerNewsReader():
         self.noOfItems = 30
         self.browsedPosition = -1
         self.OpenLinkInBrowser = False
+        self.SortOptions = {"top":"topstories","new":"newstories","best":"beststories"}
+        self.CurrentSortOption = self.SortOptions["top"]
 
     def PopulateArticlesList(self):
-        r = requests.get('https://hacker-news.firebaseio.com//v0/topstories.json')
+        requestString = 'https://hacker-news.firebaseio.com/v0/'+self.CurrentSortOption+'.json'
+        print(requestString)
+        input()
+        r = requests.get(requestString)
         self.newsIDs = json.loads(r.text)
 
     def PopulateNewsItems(self, startIndex):
@@ -39,7 +44,7 @@ class HackerNewsReader():
                 tempDict.update({"id":item["id"], "title":item["title"], "url":item["url"]})
                 self.newsItems.append(tempDict)
 
-        tempDict.update({"id":0000, "title":"\tMore: (" + str(startIndex+1+self.noOfItems) +"-"+str(startIndex+(self.noOfItems*2))+")", "url":"http://owenprosser.com"})
+        tempDict.update({"id":0000, "title":"    More: (" + str(startIndex+1+self.noOfItems) +"-"+str(startIndex+(self.noOfItems*2))+")", "url":"http://owenprosser.com"})
         self.browsedPosition = startIndex
 
     def Menu(self):
@@ -147,12 +152,30 @@ class HttpClient():
 def signal_handler(sig, frame):
     sys.exit(0)
 
+def PrintHelp():
+    print("usage: \tSort Options:\n\t[top]\t# Top Stories\n\t[new]\t# New Stories\n\t[best]\t# Best Stories")
+    quit()
+
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
-
     reader = HackerNewsReader()
-    reader.PopulateArticlesList()
 
-    print(chr(27) + "[2J")#Clear console
+    if(len(sys.argv) < 3):
+        if(len(sys.argv) > 1):
+            if(sys.argv[1] == "top"):
+                reader.CurrentSortOption = reader.SortOptions["top"]
+            elif(sys.argv[1] == "best"):
+                reader.CurrentSortOption = reader.SortOptions["best"]
+            elif(sys.argv[1] == "new"):
+                reader.CurrentSortOption = reader.SortOptions["new"]
+            else:
+                PrintHelp()
 
-    reader.Menu()
+        reader.PopulateArticlesList()
+
+        print(chr(27) + "[2J")#Clear console
+
+        reader.Menu()
+    else:
+        print("Too many Args")
+        PrintHelp()
