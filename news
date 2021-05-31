@@ -17,11 +17,10 @@ class HackerNewsReader():
         self.OpenLinkInBrowser = False
         self.SortOptions = {"top":"topstories","new":"newstories","best":"beststories"}
         self.CurrentSortOption = self.SortOptions["top"]
+        self.CurrentSortOptionString = "Top Stories"
 
     def PopulateArticlesList(self):
         requestString = 'https://hacker-news.firebaseio.com/v0/'+self.CurrentSortOption+'.json'
-        print(requestString)
-        input()
         r = requests.get(requestString)
         self.newsIDs = json.loads(r.text)
 
@@ -64,7 +63,7 @@ class HackerNewsReader():
             else:
                 suffix = ["st", "nd", "rd"][day % 10 - 1]
 
-            title = "news.ycombinator.com - " + dayName + " "+ now.strftime("%d"+suffix) + now.strftime(" of %B %Y %H:%M")
+            title = "news.ycombinator.com - " + self.CurrentSortOptionString + " - " + dayName + " "+ now.strftime("%d"+suffix) + now.strftime(" of %B %Y %H:%M")
 
             menu = Picker(titleList, title)
             menu.register_custom_handler(ord('o'),  self.OpenInBrowserInvoke)
@@ -166,8 +165,10 @@ if __name__ == "__main__":
                 reader.CurrentSortOption = reader.SortOptions["top"]
             elif(sys.argv[1] == "best"):
                 reader.CurrentSortOption = reader.SortOptions["best"]
+                reader.CurrentSortOptionString = "Best Stories"
             elif(sys.argv[1] == "new"):
                 reader.CurrentSortOption = reader.SortOptions["new"]
+                reader.CurrentSortOptionString = "New Stories"
             else:
                 PrintHelp()
 
