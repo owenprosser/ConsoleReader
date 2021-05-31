@@ -1,5 +1,5 @@
 # ConsoleReader
-An app for reading [HackerNews](https://news.ycombinator.com) from the console. 
+An app for reading [HackerNews](https://news.ycombinator.com) from the console. Stories can be reading in console using Vim or opened in the default browser. Stories can be sorted by New, Best and Top.
 
 ![ConsoleReader Screen Shot](/image/ConsoleReader.png?raw=true "ConsoleReader Screen Shot")
 
