@@ -2,3 +2,4 @@ pick
 aiohttp
 bs4
 requests
+lxml
