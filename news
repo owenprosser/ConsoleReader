@@ -14,6 +14,7 @@ class HackerNewsReader():
         self.newsIDs = []
         self.noOfItems = 30
         self.browsedPosition = -1
+        self.OpenedInBrowser = False
         self.SortOptions = {"top":"topstories","new":"newstories","best":"beststories"}
         self.CurrentSortOption = self.SortOptions["top"]
         self.CurrentSortOptionString = "Top Stories"
@@ -48,6 +49,8 @@ class HackerNewsReader():
     def Menu(self):
         selected = None
         position = 0
+        self.OpenedInBrowser = False
+
         while True:
             if(position != self.browsedPosition):
                 self.PopulateNewsItems(position)
@@ -66,21 +69,30 @@ class HackerNewsReader():
 
             menu = Picker(titleList, title)
             menu.register_custom_handler(ord('o'),  self.OpenInBrowserInvoke)
+            menu.register_custom_handler(ord('c'),  self.OpenCommentsInBrowserInvoke)
             menu.indicator = ">"
             selected = menu.start()
             selectedUrl = self.newsItems[selected[1]]['url']
 
-            if(selected[1] != len(titleList)-1):
-                self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
-            else:
-                position += self.noOfItems
+            if not (self.OpenedInBrowser):
+                if(selected[1] != len(titleList)-1):
+                    self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
+                else:
+                    position += self.noOfItems
 
     def OpenInBrowserInvoke(self, picker):
-        url = self.newsItems[picker.index]["url"];
-        self.OpenInBrowser(url)
+        self.OpenedInBrowser = True
+        url = self.newsItems[picker.index]["url"]
+        self.OpenUrlInBrowser(url)
         return None, 0
 
-    def OpenInBrowser(self, url):
+    def OpenCommentsInBrowserInvoke(self, picker):
+        self.OpenedInBrowser = True
+        url = "https://news.ycombinator.com/item?id="+str(self.newsItems[picker.index]["id"])
+        self.OpenUrlInBrowser(url)
+        return None, 0
+
+    def OpenUrlInBrowser(self, url):
         if sys.platform == 'darwin':    # in case of OS X
             subprocess.Popen(['open', url])
         else:
@@ -149,7 +161,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def PrintHelp():
-    print("usage: \tSort Options:\n\t[top]\t# Top Stories\n\t[new]\t# New Stories\n\t[best]\t# Best Stories\n\n\tKeys: \n\t{Enter} # Read Story \n\t{o}     # Open in browser")
+    print("usage: \tSort Options:\n\t[top]\t# Top Stories\n\t[new]\t# New Stories\n\t[best]\t# Best Stories\n\n\tKeys: \n\t{Enter} # Read Story \n\t{O}     # Open in browser \n\t{C}     # Open Comments in browser")
     quit()
 
 if __name__ == "__main__":
