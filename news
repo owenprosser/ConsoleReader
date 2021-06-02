@@ -14,7 +14,6 @@ class HackerNewsReader():
         self.newsIDs = []
         self.noOfItems = 30
         self.browsedPosition = -1
-        self.OpenLinkInBrowser = False
         self.SortOptions = {"top":"topstories","new":"newstories","best":"beststories"}
         self.CurrentSortOption = self.SortOptions["top"]
         self.CurrentSortOptionString = "Top Stories"
@@ -72,15 +71,13 @@ class HackerNewsReader():
             selectedUrl = self.newsItems[selected[1]]['url']
 
             if(selected[1] != len(titleList)-1):
-                if self.OpenLinkInBrowser:
-                    self.OpenInBrowser(selectedUrl)
-                else:
-                    self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
+                self.OpenTextInEditor(self.GetHtmlContent(selectedUrl))
             else:
                 position += self.noOfItems
 
     def OpenInBrowserInvoke(self, picker):
-        self.OpenLinkInBrowser = True
+        url = self.newsItems[picker.index]["url"];
+        self.OpenInBrowser(url)
         return None, 0
 
     def OpenInBrowser(self, url):
